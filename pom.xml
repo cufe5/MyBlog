@@ -10,6 +10,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>sangeng-framework</module>
+        <module>sangeng-admin</module>
+        <module>sangeng-blog</module>
     </modules>
 
     <properties>
