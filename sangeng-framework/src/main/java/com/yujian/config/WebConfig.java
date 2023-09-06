@@ -13,13 +13,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+//放行资源,(跨域问题)
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    //跨域问题配置
     public void addCorsMappings(CorsRegistry registry) {
-      // 设置允许跨域的路径
+        // 设置允许跨域的路径
         registry.addMapping("/**")
                 // 设置允许跨域请求的域名
                 .allowedOriginPatterns("*")
@@ -53,5 +53,4 @@ public class WebConfig implements WebMvcConfigurer {
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(fastJsonHttpMessageConverters());
     }
-
 }
