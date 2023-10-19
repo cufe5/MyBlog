@@ -13,6 +13,8 @@ import com.yujian.domain.entity.Category;
  */
 public interface CategoryService extends IService<Category> {
 
+    ResponseResult getListAllCategory();
+
     ResponseResult getCategoryList();
 }
 

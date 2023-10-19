@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yujian.constants.SystemConstants;
 import com.yujian.domain.ResponseResult;
+import com.yujian.domain.dto.AddArticleDto;
 import com.yujian.domain.entity.Article;
+import com.yujian.domain.entity.ArticleTag;
 import com.yujian.domain.entity.Category;
 import com.yujian.domain.vo.ArticleDetailVo;
 import com.yujian.domain.vo.ArticleListVo;
@@ -13,11 +15,14 @@ import com.yujian.domain.vo.HotArticleVo;
 import com.yujian.domain.vo.PageVo;
 import com.yujian.mapper.ArticleMapper;
 import com.yujian.service.ArticleService;
+import com.yujian.service.ArticleTagService;
 import com.yujian.service.CategoryService;
 import com.yujian.utils.BeanCopyUtils;
+import com.yujian.utils.RedisCache;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +30,19 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.yujian.constants.SystemConstants.ARTICLE_VIEW_COUNT;
+
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private RedisCache redisCache;
+
+    @Autowired
+    private ArticleTagService articleTagService;
     @Override
     public ResponseResult hotArticleList() {
         //查询热门文章，封装成ResponseResult返回
@@ -106,6 +119,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public ResponseResult getArticleDetail(Long id) {
         //根据id查询文章
         Article article = getById(id);
+        //从redis中获取viewCount
+        Integer articleViewCount = redisCache.getCacheMapValue(ARTICLE_VIEW_COUNT, id.toString());
+        article.setViewCount(articleViewCount.longValue());
 
         //转换成vo
         ArticleDetailVo articleDetailVo = BeanCopyUtils.copyBean(article, ArticleDetailVo.class);
@@ -119,5 +135,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         //封装响应返回
         return ResponseResult.okResult(articleDetailVo);
+    }
+
+    @Override
+    public ResponseResult updateViewCount(Long id) {
+        //更新redis中对应id文章的浏览量
+        redisCache.incrementCacheMapValue(ARTICLE_VIEW_COUNT,id.toString(),1);
+        return ResponseResult.okResult();
+    }
+
+    @Override
+    @Transactional
+    public ResponseResult add(AddArticleDto addArticleDto) {
+        Article article = BeanCopyUtils.copyBean(addArticleDto, Article.class);
+        save(article);
+
+        List<ArticleTag> articleTags = addArticleDto.getTags()
+                .stream().map(tagId -> new ArticleTag(article.getId(), tagId)).collect(Collectors.toList());
+
+        articleTagService.saveBatch(articleTags);
+
+        return ResponseResult.okResult();
     }
 }

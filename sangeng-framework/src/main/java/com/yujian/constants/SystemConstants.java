@@ -34,4 +34,21 @@ public class SystemConstants {
      * 评论类型为友链评论
      */
     public static final String LINK_COMMENT = "1";
+
+    /**
+     * 根据key值更新redis中对应文章的浏览量
+     */
+    public static final String ARTICLE_VIEW_COUNT = "article:viewCount";
+
+    /**
+     * 菜单和按钮
+     */
+    public static final String MENU = "C";
+    public static final String BUTTON = "F";
+
+    /**
+     * 分类是正常可用状态
+     */
+    public static final String NORMAL = "0";
+
 }

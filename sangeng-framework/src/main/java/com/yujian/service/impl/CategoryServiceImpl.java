@@ -29,6 +29,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Autowired
     private ArticleService articleService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Override
+    public ResponseResult getListAllCategory() {
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Category::getStatus,SystemConstants.NORMAL);
+        List<Category> list = categoryService.list(queryWrapper);
+        List<CategoryVo> categoryVos = BeanCopyUtils.copyBeanList(list, CategoryVo.class);
+
+
+        return ResponseResult.okResult(categoryVos);
+    }
+
     @Override
     public ResponseResult getCategoryList() {
         //查询文章表 状态为已发布的文章
