@@ -18,6 +18,7 @@ target/
 **/.mvn
 **/target/
 **/.gitignore
+.gitignore
 
 ### Eclipse ###
 .apt_generated
